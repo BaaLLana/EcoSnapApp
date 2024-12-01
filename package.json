@@ -9,7 +9,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@google-cloud/storage": "^7.14.0",
     "@hapi/hapi": "^21.3.12",
@@ -17,5 +16,6 @@
     "dateformat": "^5.0.3",
     "dotenv": "^16.4.5",
     "multer": "^1.4.5-lts.1"
-  }
+  },
+  "description": ""
 }

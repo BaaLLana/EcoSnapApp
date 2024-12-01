@@ -9,6 +9,13 @@ module.exports = [
         },
     },
     {
+        method: 'GET',
+        path: '/api/hello',
+        handler: (request, h) => {
+            return { message: 'Hello from App Engine!' };
+        },
+    },
+    {
         method: 'POST',
         path: '/upload',
         options: {

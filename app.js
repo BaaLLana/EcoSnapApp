@@ -3,8 +3,8 @@ const uploadRoutes = require('./routes/uploadRoutes');
 
 const init = async () => {
     const server = Hapi.server({
-        port: 3000,
-        host: 'localhost',
+        port: process.env.PORT || 3000, // Gunakan PORT dari environment atau fallback ke 3000
+        host: '0.0.0.0', // Gunakan '0.0.0.0' agar bisa diakses secara publik
         routes: {
             cors: {
                 origin: ['*'], // Aktifkan CORS
