@@ -21,5 +21,12 @@ module.exports = [
         },
         handler: uploadHandler,
     },
+    {
+        method: 'GET',
+        path: '/health',
+        handler: (request, h) => {
+          return h.response('OK').code(200);  // Memberikan status 200 OK
+        }
+      }
     
 ];
