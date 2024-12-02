@@ -9,6 +9,7 @@ const uploadHandler = async (request, h) => {
         if (!file) {
             return h.response({ error: 'No file provided' }).code(400);
         }
+        
 
         const filename = `${Date.now()}-${file.hapi.filename}`;
         const tempFilePath = path.join('/tmp', filename); // Gunakan direktori `/tmp`
