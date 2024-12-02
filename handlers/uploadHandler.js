@@ -1,44 +1,40 @@
-const { uploadFileToStorage } = require('../services/storage');
 const fs = require('fs');
 const path = require('path');
+const { uploadFileToStorage } = require('../services/storage');
 
 const uploadHandler = async (request, h) => {
-    const data = request.payload;
-
-    if (!data || !data.file) {
-        return h.response({ error: 'File is required!' }).code(400);
-    }
-
-    const file = data.file;
-    const filename = `${Date.now()}-${file.hapi.filename}`;
-    const filePath = path.join(__dirname, '../uploads', filename);
-
-    // Simpan file sementara di server lokal
-    const fileStream = fs.createWriteStream(filePath);
-    file.pipe(fileStream);
-
-    await new Promise((resolve, reject) => {
-        file.on('end', resolve);
-        file.on('error', reject);
-    });
-
     try {
+        const { file } = request.payload;
+
+        if (!file) {
+            return h.response({ error: 'No file provided' }).code(400);
+        }
+
+        const filename = `${Date.now()}-${file.hapi.filename}`;
+        const tempFilePath = path.join('/tmp', filename); // Gunakan direktori `/tmp`
+
+        // Simpan file sementara di direktori `/tmp`
+        const fileStream = fs.createWriteStream(tempFilePath);
+        file.pipe(fileStream);
+
+        await new Promise((resolve, reject) => {
+            file.on('end', resolve);
+            file.on('error', reject);
+        });
+
         // Upload file ke Cloud Storage
-        await uploadFileToStorage(filePath, filename);
+        await uploadFileToStorage(tempFilePath, filename);
 
         // Hapus file sementara setelah diupload
-        fs.unlinkSync(filePath);
+        fs.unlinkSync(tempFilePath);
 
-        // Placeholder respons
         return h.response({
-            message: 'File uploaded successfully!',
-            fileName: filename,
-            type: 'Plastic', // Placeholder jenis sampah
-            tips: 'Reduce, Reuse, Recycle', // Placeholder tips
+            message: 'File uploaded successfully',
+            filename,
         }).code(200);
-    } catch (err) {
-        console.error(err);
-        return h.response({ error: 'Failed to upload file.' }).code(500);
+    } catch (error) {
+        console.error('Upload error:', error);
+        return h.response({ error: 'Failed to upload file' }).code(500);
     }
 };
 
