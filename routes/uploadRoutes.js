@@ -10,6 +10,17 @@ module.exports = [
     },
     {
         method: 'GET',
+        path: '/form',
+        handler: (request, h) => {
+            return h.response(<form action="/upload" method="POST" enctype="multipart/form-data">
+                                <input type="file" name="file" />
+                                <button type="submit">Upload</button>
+                                </form>)
+            .code(200);
+        },
+    },
+    {
+        method: 'GET',
         path: '/api/hello',
         handler: (request, h) => {
             return { message: 'Hello from App Engine!' };
