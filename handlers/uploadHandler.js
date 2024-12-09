@@ -1,6 +1,7 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const { uploadFileToStorage } = require('../services/storage');
+const { uploadFileToStorage, getSignedUrl } = require('../services/storage');
 
 const uploadHandler = async (request, h) => {
     try {
@@ -9,29 +10,35 @@ const uploadHandler = async (request, h) => {
         if (!file) {
             return h.response({ error: 'No file provided' }).code(400);
         }
-        
 
+        // Generate a unique filename
         const filename = `${Date.now()}-${file.hapi.filename}`;
-        const tempFilePath = path.join('/tmp', filename); // Gunakan direktori `/tmp`
+        const tempDir = os.tmpdir();
+        const tempFilePath = path.join(tempDir, filename);
 
-        // Simpan file sementara di direktori `/tmp`
+        // Save the file temporarily
         const fileStream = fs.createWriteStream(tempFilePath);
         file.pipe(fileStream);
 
         await new Promise((resolve, reject) => {
-            file.on('end', resolve);
-            file.on('error', reject);
+            fileStream.on('finish', resolve);
+            fileStream.on('error', reject);
         });
 
-        // Upload file ke Cloud Storage
+        // Upload the file to storage
         await uploadFileToStorage(tempFilePath, filename);
 
-        // Hapus file sementara setelah diupload
+        // Delete the temporary file
         fs.unlinkSync(tempFilePath);
 
+        // Get the signed URL from storage
+        const imageUrl = await getSignedUrl(filename);
+
+        // Respond with the file details
         return h.response({
             message: 'File uploaded successfully',
-            filename,
+            id: filename, // ID based on filename
+            imageUrl, // URL to access the image
         }).code(200);
     } catch (error) {
         console.error('Upload error:', error);
@@ -40,3 +47,9 @@ const uploadHandler = async (request, h) => {
 };
 
 module.exports = { uploadHandler };
+
+
+
+
+
+
